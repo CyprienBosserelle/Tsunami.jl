@@ -7,9 +7,9 @@ Julia module with tools useful tsunami science.
         using NetCDF
         
         # Read bathy grid for nearfield simulations
-        x=NetCDF.ncread("C:\\Users\\bosserellec\\Documents\\Work\\Tohoku_cut.nc","lon")
-        y=NetCDF.ncread("C:\\Users\\bosserellec\\Documents\\Work\\Tohoku_cut.nc","lat")
-        zb=NetCDF.ncread("C:\\Users\\bosserellec\\Documents\\Work\\Tohoku_cut.nc","z")
+        x=NetCDF.ncread("Tohoku_bathy.nc","lon")
+        y=NetCDF.ncread("Tohoku_bathy.nc","lat")
+        zb=NetCDF.ncread("Tohoku_bathy.nc","z")
         
         # Convert topography to actual water dpth assuming 0.0 mean sea level
         zs=0.0;
@@ -32,7 +32,8 @@ Julia module with tools useful tsunami science.
         # Calculate the initial tsunami wave
         dz=InitTsunamiGeo(x,y,H,fault)
 
-        write2nc(x,y,dz,"C:\\Users\\bosserellec\\Documents\\Work\\Tohoku_fulldz.nc")
+        write2nc(x,y,dz,"Tohoku_fulldz.nc")
+        
+ Tohoku_fulldz.nc file can now be used to initialise a tsunami wave in a hydrodynamics model 
 
-        uz=InitTsunamiGeo(x,y,zeros(size(H)),fault)
-        write2nc(x,y,uz,"C:\\Users\\bosserellec\\Documents\\Work\\Tohoku_uz_only.nc")
+        
