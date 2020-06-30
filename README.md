@@ -2,7 +2,7 @@
 Julia module with tools useful tsunami science.
 
 ## Demo for generating a tsunami initial wave
-        
+ ```julia      
         using Tsunami.jl
         using NetCDF
         
@@ -33,6 +33,7 @@ Julia module with tools useful tsunami science.
         dz=InitTsunamiGeo(x,y,H,fault)
 
         write2nc(x,y,dz,"Tohoku_fulldz.nc")
+  ```
         
  Tohoku_fulldz.nc file can now be used to initialise a tsunami wave in a hydrodynamics model 
 
