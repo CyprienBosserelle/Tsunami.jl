@@ -13,6 +13,7 @@ module Tsunami
 
 """
 Fault parameter structure to simplify tsunami generation from earthquake
+    faultparam(lon,lat,length,width,depth strike,dip,rake,slip,tinit,trise)
 """
     mutable struct faultparam
         lon::Float64
