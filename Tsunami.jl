@@ -64,8 +64,7 @@ Generate tsunami initial wave for a Geographical domain (i.e. lat and lon coordi
         y=NetCDF.ncread("C:\\Users\\bosserellec\\Documents\\Work\\Tohoku_cut.nc","lat")
         zb=NetCDF.ncread("C:\\Users\\bosserellec\\Documents\\Work\\Tohoku_cut.nc","z")
 
-        xx=x
-        yy=y
+
         # Convert topography to actual water dpth assuming 0.0 mean sea level
         zs=0.0;
         H=max.(0.0,zs.-zb)
