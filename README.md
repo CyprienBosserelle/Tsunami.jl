@@ -16,6 +16,7 @@ Julia module with tools useful tsunami science.
         H=max.(0.0,zs.-zb)
 
         # Define fault parameters here relative to the bottom left reference point
+        # fault=faultparam(lon,lat,length,width,depth strike,dip,rake,slip,tinit,trise)
         # Note: bottom left corner of fault with a strike of 192 means north east corner
         fault=faultparam(144.33,39.6,300.0,150.0,0.0,192.0,12.0,90.0,0.0,0.0,0.0);
 
