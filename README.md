@@ -1,2 +1,2 @@
 # Tsunami.jl
-Package with tools useful tsunami science
+Julia package with tools useful tsunami science
