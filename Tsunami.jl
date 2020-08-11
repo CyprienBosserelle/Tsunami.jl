@@ -287,8 +287,9 @@ Generate tsunami initial wave for a Geographical domain (i.e. lat and lon coordi
 
 
     function cartdistance2eq(e,n,eqx,eqy)
-        de=e-eqx;
-        dn=n-eqy;
+        ef=e.-eqx;
+        nf=n.-eqy;
+        return ef,nf
     end
 
     function cartsphdist2eq(e,n,eqx,eqy)
