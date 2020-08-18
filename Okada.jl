@@ -681,7 +681,7 @@ module Okada
 		u = (eta.*cos.(dip) + q.*sin.(dip)).*q./(R.*(R + xi)) + cos.(dip).*xi.*q./(R.*(R + eta)) - I5.(xi,eta,q,dip,nu,R,db).*sin.(dip).^2;
 		#k = findall(q.!=0);
 		if q!=0
-			u = u + cos.(dip).*atan.(xi.*eta./(q.*R));
+			u = u - cos.(dip).*atan.(xi.*eta./(q.*R));
 		end
 		#u[k] = u[k] - cos.(dip).*atan.(xi[k].*eta[k]./(q[k].*R[k]));
 		return u
