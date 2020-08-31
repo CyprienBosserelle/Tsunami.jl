@@ -189,7 +189,7 @@ Generate tsunami initial wave for a Geographical domain (i.e. lat and lon coordi
 
         earthradius=6356750.52;
 
-        bearing=atan(dn,de);
+        bearing=atan(de,dn);
 
         dist=hypot(dn,de);
 
