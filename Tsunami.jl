@@ -9,7 +9,7 @@
 module Tsunami
 
     import Okada,NetCDF
-    export InitTsunamiGeo,faultparam,faultkm2m!,rotatexy,unrotatexy,unrotatexyCompass,rotatexyCompass,sphericDist,sphericOffset,mvBLref2centroid!,emptygrid,cartsphdist2eq,cartdistance2eq,CalcMw,Mw2slip,Calcslip!,Okadavert
+    export InitTsunamiGeo,InitTsunami,faultparam,faultkm2m!,rotatexy,unrotatexy,unrotatexyCompass,rotatexyCompass,sphericDist,sphericOffset,mvBLref2centroid!,emptygrid,cartsphdist2eq,cartdistance2eq,CalcMw,Mw2slip,Calcslip!,Okadavert
 
 """
 Fault parameter structure to simplify tsunami generation from earthquake
@@ -28,69 +28,7 @@ Fault parameter structure to simplify tsunami generation from earthquake
         tinit::Float64
         trise::Float64
     end
-"""
-Generate tsunami initial wave for a Geographical domain (i.e. lat and lon coordinates)
-    usage: dz=InitTsunamiGeo(xx,yy,H,fault)
-    where xx and yy can be vector or a range
-    H is an array of water depth [m]
-    see tsunamidemo()
 
-"""
-    function InitTsunamiGeo(xx,yy,H,fault::faultparam)
-
-        # Create the array of easting and northing where deformation will be calculated
-        E,N=emptygrid(xx,yy)
-        ef,nf=cartsphdist2eq(E,N,fault.lon,fault.lat);
-
-
-        # Calculate dHdx and dHdy which we need to account for horizontal displacement comntribution
-        dHdx=zeros(size(ef));
-        dHdy=zeros(size(nf));
-
-        dHdx[2:end,:]=diff(H,dims=1)./diff(ef,dims=1);
-        dHdy[:,2:end]=diff(H,dims=2)./diff(nf,dims=2);
-
-        # Calculate horizontal and vertical deformation
-        uX,uY,uZ=Okada.Okada85Dis(ef,nf,fault.depth,fault.strike,fault.dip,fault.length,fault.width,fault.rake,fault.slip,0);
-
-        dz = uZ .+ uX .* dHdx .+ uY .* dHdy
-
-        return dz
-    end
-    function tsunamidemo(ncfile)
-
-        #Read bathy grid for nearfield simulations
-        x=NetCDF.ncread("C:\\Users\\bosserellec\\Documents\\Work\\Tohoku_cut.nc","lon")
-        y=NetCDF.ncread("C:\\Users\\bosserellec\\Documents\\Work\\Tohoku_cut.nc","lat")
-        zb=NetCDF.ncread("C:\\Users\\bosserellec\\Documents\\Work\\Tohoku_cut.nc","z")
-
-
-        # Convert topography to actual water dpth assuming 0.0 mean sea level
-        zs=0.0;
-        H=max.(0.0,zs.-zb)
-
-        # Define fault parameters here relative to the bottom left reference point
-        # Note: bottom left corner of fault with a strike of 192 means north east corner
-        fault=faultparam(144.33,39.6,300.0,150.0,0.0,192.0,12.0,90.0,0.0,0.0,0.0);
-
-        #convert km width lengtn and depth to m
-        # (It is easier to think in km but safer to keep all in a standard unit [m])
-        faultkm2m!(fault)
-
-        #convert from bottom left reference point to centroid
-        mvBLref2centroid!(fault)
-
-        # Calculate the slip for a given earthquake magnitude
-        Calcslip!(fault,9.1)
-
-        # Calculate the initial tsunami wave
-        dz=InitTsunamiGeo(x,y,H,fault)
-
-        write2nc(x,y,dz,"C:\\Users\\bosserellec\\Documents\\Work\\Tohoku_fulldz.nc")
-
-        uz=InitTsunamiGeo(x,y,zeros(size(H)),fault)
-        write2nc(x,y,uz,"C:\\Users\\bosserellec\\Documents\\Work\\Tohoku_uz_only.nc")
-    end
 
 
     function CalcMw(fault::faultparam)
@@ -303,7 +241,7 @@ Generate tsunami initial wave for a Geographical domain (i.e. lat and lon coordi
 
         return ef,nf
     end
-end
+
 
 #write2nc writes a matrix to netcdf file
 function write2nc(x,y,z,ncfile,varnames)
@@ -323,4 +261,99 @@ end
 function write2nc(x,y,z,ncfile)
     varnames=["x","y","z"];
     write2nc(x,y,z,ncfile,varnames)
+end
+
+"""
+Generate tsunami initial wave for a Geographical domain (i.e. lat and lon coordinates)
+    usage: dz=InitTsunamiGeo(xx,yy,H,fault)
+    where xx and yy can be vector or a range
+    H is an array of water depth [m]
+    see tsunamidemo()
+
+"""
+    function InitTsunamiGeo(xx,yy,H,fault::faultparam)
+
+        # Create the array of easting and northing where deformation will be calculated
+        E,N=emptygrid(xx,yy)
+        ef,nf=cartsphdist2eq(E,N,fault.lon,fault.lat);
+
+
+        # Calculate dHdx and dHdy which we need to account for horizontal displacement comntribution
+        dHdx=zeros(size(ef));
+        dHdy=zeros(size(nf));
+
+        dHdx[2:end,:]=diff(H,dims=1)./diff(ef,dims=1);
+        dHdy[:,2:end]=diff(H,dims=2)./diff(nf,dims=2);
+
+        # Calculate horizontal and vertical deformation
+        uX,uY,uZ=Okada.Okada85Dis(ef,nf,fault.depth,fault.strike,fault.dip,fault.length,fault.width,fault.rake,fault.slip,0);
+
+        dz = uZ .+ uX .* dHdx .+ uY .* dHdy
+
+        return dz
+    end
+    """
+    Generate tsunami initial wave for a projected domain (i.e. Easting and Northing coordinates)
+        usage: dz=InitTsunami(xx,yy,H,fault)
+        where xx and yy can be vector or a range
+        H is an array of water depth [m]
+        see tsunamidemo()
+
+    """
+        function InitTsunami(xx,yy,H,fault::faultparam)
+
+            # Create the array of easting and northing where deformation will be calculated
+            E,N=emptygrid(xx,yy)
+
+            ef,nf=cartdistance2eq(E,N,fault.lon,fault.lat);
+
+
+            # Calculate dHdx and dHdy which we need to account for horizontal displacement comntribution
+            dHdx=zeros(size(ef));
+            dHdy=zeros(size(nf));
+
+            dHdx[2:end,:]=diff(H,dims=1)./diff(ef,dims=1);
+            dHdy[:,2:end]=diff(H,dims=2)./diff(nf,dims=2);
+
+            # Calculate horizontal and vertical deformation
+            uX,uY,uZ=Okada.Okada85Dis(ef,nf,fault.depth,fault.strike,fault.dip,fault.length,fault.width,fault.rake,fault.slip,0);
+
+            dz = uZ .+ uX .* dHdx .+ uY .* dHdy
+
+            return dz
+        end
+    function tsunamidemo(ncfile)
+
+        #Read bathy grid for nearfield simulations
+        x=NetCDF.ncread("C:\\Users\\bosserellec\\Documents\\Work\\Tohoku_cut.nc","lon")
+        y=NetCDF.ncread("C:\\Users\\bosserellec\\Documents\\Work\\Tohoku_cut.nc","lat")
+        zb=NetCDF.ncread("C:\\Users\\bosserellec\\Documents\\Work\\Tohoku_cut.nc","z")
+
+
+        # Convert topography to actual water dpth assuming 0.0 mean sea level
+        zs=0.0;
+        H=max.(0.0,zs.-zb)
+
+        # Define fault parameters here relative to the bottom left reference point
+        # Note: bottom left corner of fault with a strike of 192 means north east corner
+        fault=faultparam(144.33,39.6,300.0,150.0,0.0,192.0,12.0,90.0,0.0,0.0,0.0);
+
+        #convert km width lengtn and depth to m
+        # (It is easier to think in km but safer to keep all in a standard unit [m])
+        faultkm2m!(fault)
+
+        #convert from bottom left reference point to centroid
+        mvBLref2centroid!(fault)
+
+        # Calculate the slip for a given earthquake magnitude
+        Calcslip!(fault,9.1)
+
+        # Calculate the initial tsunami wave
+        dz=InitTsunamiGeo(x,y,H,fault)
+
+        write2nc(x,y,dz,"C:\\Users\\bosserellec\\Documents\\Work\\Tohoku_fulldz.nc")
+
+        uz=InitTsunamiGeo(x,y,zeros(size(H)),fault)
+        write2nc(x,y,uz,"C:\\Users\\bosserellec\\Documents\\Work\\Tohoku_uz_only.nc")
+    end
 end
