@@ -397,46 +397,81 @@ module Okada
 	end
 	import Test
 
+
+	function runtest(x,y,d,dip,L,W,rake,slip,u3,ref, precision)
+
+	    ue,un,uz,uze,uzn,unn,une,uen,uee=Okada85(x-L/2,y-cosd(dip)*W/2,d-sind(dip)*W/2,90,dip,L,W,rake,slip,u3)
+	    return Test.@test [ue,un,uz,-uee,-uen,-une,-unn,uze,uzn] ≈ ref atol=precision
+	end
+
+	"""
+	Test function for Okada
+	"""
 	function testOkada()
 		# ###################
 		# ##### TEST
 		# ####################
 
-		# Expected results
-		check = [-8.689E-3,-4.298E-3,-2.747E-3,-1.220E-3,+2.470E-4,-8.191E-3,-5.814E-4,-5.175E-3,+2.945E-4]	# case 2 - strike
-	# -4.682E-3,-3.527E-2,-3.564E-2,-8.867E-3,-1.519E-4,+4.057E-3,-1.035E-2,+4.088E-3,+2.626E-3;	# case 2 - dip
-	# -2.660E-4,+1.056E-2,+3.214E-3,-5.655E-4,+1.993E-3,-1.066E-3,+1.230E-2,-3.730E-4,+1.040E-2;	# case 2 - tensile
-	#         0,+5.253E-3,        0,        0,-1.864E-2,-2.325E-3,        0,        0,+2.289E-2;	# case 3 - strike
-	#         0,        0,        0,        0,+2.748E-2,        0,        0,        0,-7.166E-2;	# case 3 - dip
-	# +1.223E-2,        0,-1.606E-2,-4.182E-3,        0,        0,-2.325E-3,-9.146E-3,        0;	# case 3 - tensile
-	#         0,-1.303E-3,        0,        0,+2.726E-3,+7.345E-4,        0,        0,-4.422E-3;	# case 4 - strike
-	#         0,        0,        0,        0,+5.157E-3,        0,        0,        0,-1.901E-2;	# case 4 - dip
-	# +3.507E-3,        0,-7.740E-3,-1.770E-3,        0,        0,-7.345E-4,-1.843E-3,        0];	# case 4 - tensile
-	#
-		 x=2
-		 y=3
-		 d=4
-		 dip=70
-		 L=3
-		 W=2
-		 u3=0
-		 rake=0
-		 slip=1
-		#
-		#
-		ue,un,uz,uze,uzn,unn,une,uen,uee=Okada85(x-L/2,y-cosd(dip)*W/2,d+sind(dip)*W/2,90,dip,L,W,rake,slip,u3)
-		return Test.@test [ue,un,uz] ≈ check[1:3] atol=1.0e-6
+		Test.@testset "Okada Test" begin
 
+		    Test.@testset "Case 2" begin
+		        x=2; y=3; d=4;dip=70;L=3;W=2;
+		        #Strike
+		        rake=0;slip=1;u3=0;
+		        ref = [-8.689E-3,-4.298E-3,-2.747E-3,-1.220E-3,+2.470E-4,-8.191E-3,-5.814E-4,-5.175E-3,+2.945E-4]	# case 2 - strike
 
+		        runtest(x,y,d,dip,L,W,rake,slip,u3,ref,1.0e-6)
 
-	#
-	# xi=x
-	# eta=1
-	# q=1
-	# dip=dip*pi/180
-	# nu=0.25
-	#
-	# ux_ss(xi,eta,q,dip*pi/180,0.25)
+		        # Dip
+		        ref = [-4.682E-3,-3.527E-2,-3.564E-2,-8.867E-3,-1.519E-4,+4.057E-3,-1.035E-2,+4.088E-3,+2.626E-3];	# case 2 - dip
+		        rake=90;slip=1;
+
+		        runtest(x,y,d,dip,L,W,rake,slip,u3,ref,1.0e-5)
+
+		        # tensile
+		        slip = 0; u3=1; rake=0;
+		        ref = [-2.660E-4,+1.056E-2,+3.214E-3,-5.655E-4,+1.993E-3,-1.066E-3,+1.230E-2,-3.730E-4,+1.040E-2];	# case 2 - tensile
+
+		        runtest(x,y,d,dip,L,W,rake,slip,u3,ref,1.0e-5)
+
+		    end
+		    Test.@testset "Case 3" begin
+		        x = 0; y = 0; d = 4; dip = 90; L = 3; W = 2;
+		        # Strike
+		        rake=0;slip=1;u3=0;
+		        ref = [0,+5.253E-3,        0,        0,-1.864E-2,-2.325E-3,        0,        0,+2.289E-2];	# case 3 - strike
+		        runtest(x,y,d,dip,L,W,rake,slip,u3,ref,1.0e-5)
+
+		        # Dip
+		        rake=90;slip=1;
+		        ref = [0,        0,        0,        0,+2.748E-2,        0,        0,        0,-7.166E-2];	# case 3 - dip
+		        runtest(x,y,d,dip,L,W,rake,slip,u3,ref,1.0e-5)
+
+		        # tensile
+		        slip = 0; u3=1; rake=0;
+		        ref = [+1.223E-2,        0,-1.606E-2,-4.182E-3,        0,        0,-2.325E-3,-9.146E-3, 0];	# case 3 - tensile
+		        runtest(x,y,d,dip,L,W,rake,slip,u3,ref,1.0e-5)
+		    end
+
+		    Test.@testset "Case 4" begin
+		        x = 0; y = 0; d = 6; dip = 90; L = 3; W = 2;
+		        # Strike
+		        rake=180;slip=1;u3=0;
+		        ref = [0,-1.303E-3,        0,        0,+2.726E-3,+7.345E-4,        0,        0,-4.422E-3];	# case 4 - strike
+		        runtest(x,y,d,dip,L,W,rake,slip,u3,ref,1.0e-5)
+
+		        # Dip
+		        rake=90;slip=1;
+		        ref = [0,        0,        0,        0,+5.157E-3,        0,        0,        0,-1.901E-2];	# case 4 - dip
+		        runtest(x,y,d,dip,L,W,rake,slip,u3,ref,1.0e-5)
+
+		        # tensile
+		        slip = 0; u3=1; rake=0;
+		        ref = [+3.507E-3,        0,-7.740E-3,-1.770E-3,        0,        0,-7.345E-4,-1.843E-3,0];
+		        runtest(x,y,d,dip,L,W,rake,slip,u3,ref,1.0e-5)
+
+		    end
+		end
 	end
 
 
@@ -681,7 +716,7 @@ module Okada
 		u = (eta.*cos.(dip) + q.*sin.(dip)).*q./(R.*(R + xi)) + cos.(dip).*xi.*q./(R.*(R + eta)) - I5.(xi,eta,q,dip,nu,R,db).*sin.(dip).^2;
 		#k = findall(q.!=0);
 		if q!=0
-			u = u + cos.(dip).*atan.(xi.*eta./(q.*R));
+			u = u - cos.(dip).*atan.(xi.*eta./(q.*R));
 		end
 		#u[k] = u[k] - cos.(dip).*atan.(xi[k].*eta[k]./(q[k].*R[k]));
 		return u
