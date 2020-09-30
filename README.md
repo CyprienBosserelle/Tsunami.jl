@@ -18,14 +18,15 @@ Julia module with tools useful tsunami science.
         # Define fault parameters here relative to the bottom left reference point
         # fault=faultparam(lon,lat,length,width,depth strike,dip,rake,slip,tinit,trise)
         # Note: bottom left corner of fault with a strike of 192 means north east corner
-        # Also we keep lip to 0.0 but we will calculate it after
+        # Also we keep slip to 0.0 but we will calculate it after
         fault=faultparam(144.33,39.6,300.0,150.0,0.0,192.0,12.0,90.0,0.0,0.0,0.0);
 
-        #convert km width lengtn and depth to m
+        # Convert width, length, and depth from km to m
         # (It is easier to think in km but safer to keep all in a standard unit [m])
         faultkm2m!(fault)
 
-        #convert from bottom left reference point to centroid (This is what our Okada function expects)
+        # Convert from bottom left reference point to centroid (This is what our Okada function expects)
+        # some seismologist like bottom-left reference and some like centroid
         mvBLref2centroid!(fault)
 
         # Calculate the slip for a given earthquake magnitude and store it in our fault parameter
