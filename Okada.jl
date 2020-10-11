@@ -147,7 +147,7 @@ module Okada
 		Created: 1997
 		Updated: 2014-05-24
 		"""
-	function Okada85(e,n,depth,strike,dip,L,W,rake,slip,U3)
+	function Okada85(e,n,depth,strike,dip,L,W,rake,slip,U3; nu=0.25)
 
 		if(depth<W*0.5*sind(dip))
 			warn("Depth too shallow! ")
@@ -156,7 +156,6 @@ module Okada
 		strike = strike*pi/180;	# converting STRIKE in radian
 		dip = dip*pi/180;	# converting DIP in radian ('delta' in Okada's equations)
 		rake = rake*pi/180;	#converting RAKE in radian
-		nu = 0.25;
 
 		# Defines dislocation in the fault plane system
 		U1 = cos(rake).*slip;
@@ -233,12 +232,11 @@ module Okada
 
 	end
 
-	function Okada85vert(e,n,depth,strike,dip,L,W,rake,slip,U3)
+	function Okada85vert(e,n,depth,strike,dip,L,W,rake,slip,U3; nu=0.25)
 
 		strike = strike*pi/180;	# converting STRIKE in radian
 		dip = dip*pi/180;	# converting DIP in radian ('delta' in Okada's equations)
 		rake = rake*pi/180;	#converting RAKE in radian
-		nu = 0.25;
 
 		# Defines dislocation in the fault plane system
 		U1 = cos(rake).*slip;
@@ -314,12 +312,11 @@ module Okada
 
 
 	end
-	function Okada85Dis(e,n,depth,strike,dip,L,W,rake,slip,U3)
+	function Okada85Dis(e,n,depth,strike,dip,L,W,rake,slip,U3; nu=0.25)
 
 		strike = strike*pi/180;	# converting STRIKE in radian
 		dip = dip*pi/180;	# converting DIP in radian ('delta' in Okada's equations)
 		rake = rake*pi/180;	#converting RAKE in radian
-		nu = 0.25;
 
 		# Defines dislocation in the fault plane system
 		U1 = cos(rake).*slip;
