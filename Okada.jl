@@ -2,10 +2,10 @@
 """
     Okada 1985 Surface deformation due to a finite rectangular source.
 
-	Okada85(E,N,DEPTH,STRIKE,DIP,LENGTH,WIDTH,RAKE,SLIP,OPEN)
+	okada85(E,N,DEPTH,STRIKE,DIP,LENGTH,WIDTH,RAKE,SLIP,OPEN)
 
 	Work in progress...
-	uE,uN,uZ = OKADA85(...) displacements only;
+	uE,uN,uZ = okada85(...) displacements only;
 
 	References:
 	   Aki K., and P. G. Richards, Quantitative seismology, Freemann & Co,
@@ -19,7 +19,7 @@
 """
 module Okada
 
-	export Okada85, testOkada
+	export okada85, testokada
 	
 	#	Translated to Julia By Cyprien Bosserelle 2020
 	#	References:
@@ -147,7 +147,7 @@ module Okada
 		Created: 1997
 		Updated: 2014-05-24
 		"""
-	function Okada85(e,n,depth,strike,dip,L,W,rake,slip,U3; nu=0.25, nargout::Integer=3)
+	function okada85(e,n,depth,strike,dip,L,W,rake,slip,U3; nu=0.25, nargout::Integer=3)
 
 		## arg check
         any(nargout .== [1,3,9,12]) || error("kwarg 'nargout' must be either 1, 3, 9, or 12.")
@@ -250,14 +250,14 @@ module Okada
 	import Test
 	function runtest(x,y,d,dip,L,W,rake,slip,u3,ref, precision)
 
-	    ue,un,uz,uze,uzn,unn,une,uen,uee=Okada85(x-L/2,y-cosd(dip)*W/2,d-sind(dip)*W/2,90,dip,L,W,rake,slip,u3; nargout=9)
+	    ue,un,uz,uze,uzn,unn,une,uen,uee=okada85(x-L/2,y-cosd(dip)*W/2,d-sind(dip)*W/2,90,dip,L,W,rake,slip,u3; nargout=9)
 	    return Test.@test [ue,un,uz,uee,uen,une,unn,uze,uzn] ≈ ref atol=precision
 	end
 
 	"""
 	Test function for Okada
 	"""
-	function testOkada()
+	function testokada()
 		# ###################
 		# ##### TEST
 		# ####################
@@ -351,7 +351,6 @@ module Okada
 	function ux_ss(xi,eta,q,dip,nu)
 		R = sqrt(xi^2 + eta^2 + q^2)
 		u = xi*q/(R*(R + eta)) + I1(xi,eta,q,dip,nu,R)*sin(dip)
-		k = findall(q.!=0)
 		if q!=0
 			u = u + atan(xi*eta/(q*R))
 		end
