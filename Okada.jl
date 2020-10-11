@@ -147,7 +147,7 @@ module Okada
 		Created: 1997
 		Updated: 2014-05-24
 		"""
-	function okada85(e,n,depth,strike,dip,L,W,rake,slip,U3; nu=0.25, nargout::Integer=3)
+	function okada85(e::Real,n::Real,depth,strike,dip,L,W,rake,slip,U3; nu=0.25, nargout::Integer=3)
 
 		## arg check
         any(nargout .== [1,3,9,12]) || error("kwarg 'nargout' must be either 1, 3, 9, or 12.")
@@ -245,6 +245,11 @@ module Okada
             uzz = -(uee + unn)*nu/(1-nu)
 		    return [ue,un,uz,uee,une,uze,uen,unn,uzn,uez,unz,uzz]
 		end
+	end
+
+	function okada85(e::AbstractArray,n::AbstractArray,depth,strike,dip,L,W,rake,slip,U3; kwargs...)
+		size(e) != size(n) && error("The sizes of E and N must be the same. \n size(E) = $(size(e)) \n size(N) = $(size(n))")
+		return map(x->reshape(x,size(e)), collect.(zip(okada85.(e,n,depth,strike,dip,L,W,rake,slip,U3; kwargs...)...)))
 	end
 
 	import Test
