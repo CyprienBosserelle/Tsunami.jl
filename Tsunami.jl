@@ -9,7 +9,7 @@
 module Tsunami
 
     import Okada,NetCDF
-    export InitTsunamiGeo,InitTsunami,faultparam,faultkm2m!,rotatexy,unrotatexy,unrotatexyCompass,rotatexyCompass,sphericDist,sphericOffset,mvBLref2centroid!,emptygrid,cartsphdist2eq,cartdistance2eq,CalcMw,Mw2slip,Calcslip!,Okadavert
+    export InitTsunamiGeo,InitTsunami,faultparam,faultkm2m!,rotatexy,unrotatexy,unrotatexyCompass,rotatexyCompass,sphericDist,sphericOffset,mvBLref2centroid!,emptygrid,cartsphdist2eq,cartdistance2eq,CalcMw,Mw2slip,Calcslip!
 
 """
 Fault parameter structure to simplify tsunami generation from earthquake
@@ -286,7 +286,7 @@ Generate tsunami initial wave for a Geographical domain (i.e. lat and lon coordi
         dHdy[:,2:end]=diff(H,dims=2)./diff(nf,dims=2);
 
         # Calculate horizontal and vertical deformation
-        uX,uY,uZ=Okada.Okada85Dis(ef,nf,fault.depth,fault.strike,fault.dip,fault.length,fault.width,fault.rake,fault.slip,0);
+        uX,uY,uZ = Okada.okada85(ef,nf,fault.depth,fault.strike,fault.dip,fault.length,fault.width,fault.rake,fault.slip,0; nargout=3)
 
         dz = uZ .+ uX .* dHdx .+ uY .* dHdy
 
@@ -316,7 +316,7 @@ Generate tsunami initial wave for a Geographical domain (i.e. lat and lon coordi
             dHdy[:,2:end]=diff(H,dims=2)./diff(nf,dims=2);
 
             # Calculate horizontal and vertical deformation
-            uX,uY,uZ=Okada.Okada85Dis(ef,nf,fault.depth,fault.strike,fault.dip,fault.length,fault.width,fault.rake,fault.slip,0);
+            uX,uY,uZ = Okada.okada85(ef,nf,fault.depth,fault.strike,fault.dip,fault.length,fault.width,fault.rake,fault.slip,0; nargout=3)
 
             dz = uZ .+ uX .* dHdx .+ uY .* dHdy
 
