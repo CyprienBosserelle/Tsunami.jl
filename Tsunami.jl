@@ -325,9 +325,9 @@ Generate tsunami initial wave for a Geographical domain (i.e. lat and lon coordi
     function tsunamidemo(ncfile)
 
         #Read bathy grid for nearfield simulations
-        x=NetCDF.ncread("C:\\Users\\bosserellec\\Documents\\Work\\Tohoku_cut.nc","lon")
-        y=NetCDF.ncread("C:\\Users\\bosserellec\\Documents\\Work\\Tohoku_cut.nc","lat")
-        zb=NetCDF.ncread("C:\\Users\\bosserellec\\Documents\\Work\\Tohoku_cut.nc","z")
+        x=NetCDF.ncread(ncfile,"lon")
+        y=NetCDF.ncread(ncfile,"lat")
+        zb=NetCDF.ncread(ncfile,"z")
 
 
         # Convert topography to actual water dpth assuming 0.0 mean sea level
@@ -335,8 +335,12 @@ Generate tsunami initial wave for a Geographical domain (i.e. lat and lon coordi
         H=max.(0.0,zs.-zb)
 
         # Define fault parameters here relative to the bottom left reference point
+        # here we put the ref point at the center of the grid
+        # Normally the sismology determines the location of the reference poit of the fault
+        flt_lon=minimum(x)+0.5*(maximum(x)-minimum(x));
+        flt_lat=minimum(y)+0.5*(maximum(y)-minimum(y));
         # Note: bottom left corner of fault with a strike of 192 means north east corner
-        fault=faultparam(144.33,39.6,300.0,150.0,0.0,192.0,12.0,90.0,0.0,0.0,0.0);
+        fault=faultparam(flt_lon,flt_lat,300.0,150.0,0.0,192.0,12.0,90.0,0.0,0.0,0.0);
 
         #convert km width lengtn and depth to m
         # (It is easier to think in km but safer to keep all in a standard unit [m])
@@ -351,9 +355,9 @@ Generate tsunami initial wave for a Geographical domain (i.e. lat and lon coordi
         # Calculate the initial tsunami wave
         dz=InitTsunamiGeo(x,y,H,fault)
 
-        write2nc(x,y,dz,"C:\\Users\\bosserellec\\Documents\\Work\\Tohoku_fulldz.nc")
+        write2nc(x,y,dz,"Vertical_displacement.nc")
 
         uz=InitTsunamiGeo(x,y,zeros(size(H)),fault)
-        write2nc(x,y,uz,"C:\\Users\\bosserellec\\Documents\\Work\\Tohoku_uz_only.nc")
+        write2nc(x,y,uz,"Vertical_displacement_Flat_Bathymetry.nc")
     end
 end
