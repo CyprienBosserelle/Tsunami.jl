@@ -199,13 +199,13 @@ Fault parameter structure to simplify tsunami generation from earthquake
         return E,N
     end
 
-    function emptygrid(x::StepRange,y::StepRange)
+    function emptygrid(x::AbstractRange,y::AbstractRange)
         # porduce arrays of lat,lon/easting,northing representing an empty grid
 
 
 
-        xx=collect(xx);
-        yy=collect(yy);
+        xx=collect(x);
+        yy=collect(y);
 
 
 
@@ -244,34 +244,34 @@ Fault parameter structure to simplify tsunami generation from earthquake
     end
 
 
-#write2nc writes a matrix to netcdf file
-function write2nc(x,y,z,ncfile,varnames)
+    #write2nc writes a matrix to netcdf file
+    function write2nc(x,y,z,ncfile,varnames)
 
-    xatts = Dict("longname" => "longitude",
-      "units"    => "m")
-    yatts = Dict("longname" => "latitude",
-              "units"    => "m")
-    varatts = Dict("longname" => "z",
-              "units"    => "m")
-    NetCDF.nccreate(ncfile,varnames[3],varnames[1],x,xatts,varnames[2],y,yatts,atts=varatts)
-    NetCDF.ncwrite(x,ncfile,varnames[1]);
-    NetCDF.ncwrite(y,ncfile,varnames[2]);
-    NetCDF.ncwrite(z,ncfile,varnames[3]);
-    NetCDF.ncclose();
-end
-function write2nc(x,y,z,ncfile)
-    varnames=["x","y","z"];
-    write2nc(x,y,z,ncfile,varnames)
-end
+        xatts = Dict("longname" => "longitude",
+          "units"    => "m")
+        yatts = Dict("longname" => "latitude",
+                  "units"    => "m")
+        varatts = Dict("longname" => "z",
+                  "units"    => "m")
+        NetCDF.nccreate(ncfile,varnames[3],varnames[1],x,xatts,varnames[2],y,yatts,atts=varatts)
+        NetCDF.ncwrite(x,ncfile,varnames[1]);
+        NetCDF.ncwrite(y,ncfile,varnames[2]);
+        NetCDF.ncwrite(z,ncfile,varnames[3]);
+        NetCDF.ncclose();
+    end
+    function write2nc(x,y,z,ncfile)
+        varnames=["x","y","z"];
+        write2nc(x,y,z,ncfile,varnames)
+    end
 
-"""
-Generate tsunami initial wave for a Geographical domain (i.e. lat and lon coordinates)
-    usage: dz=InitTsunamiGeo(xx,yy,H,fault)
-    where xx and yy can be vector or a range
-    H is an array of water depth [m]
-    see tsunamidemo()
+    """
+    Generate tsunami initial wave for a Geographical domain (i.e. lat and lon coordinates)
+        usage: dz=InitTsunamiGeo(xx,yy,H,fault)
+        where xx and yy can be vector or a range
+        H is an array of water depth [m]
+        see tsunamidemo()
 
-"""
+    """
     function InitTsunamiGeo(xx,yy,H,fault::faultparam)
 
         # Create the array of easting and northing where deformation will be calculated
@@ -293,6 +293,9 @@ Generate tsunami initial wave for a Geographical domain (i.e. lat and lon coordi
 
         return dz
     end
+
+
+
     """
     Generate tsunami initial wave for a projected domain (i.e. Easting and Northing coordinates)
         usage: dz=InitTsunami(xx,yy,H,fault)
