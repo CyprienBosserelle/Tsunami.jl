@@ -3,7 +3,8 @@
  Tsunami module
  Collection of function useful for tsunami simulations.
 
-     Cyprien Bosserelle 2020
+     Cyprien Bosserelle and Takuya Miyashita 2020
+
 
 """
 module Tsunami

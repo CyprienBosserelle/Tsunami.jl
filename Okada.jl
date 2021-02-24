@@ -14,14 +14,14 @@
 	     half-space, Bull. Seismol. Soc. Am., 75:4, 1135-1154, 1985.
 
 	Copyright (c) 1997-2012, François Beauducel, covered by BSD License.
-	Translated from Matlab to Julia By Cyprien Bosserelle 2020
+	Translated from Matlab to Julia By Cyprien Bosserelle and Takuya Miyashita 2020
 
 """
 module Okada
 
 	export okada85, testokada
-	
-	#	Translated to Julia By Cyprien Bosserelle 2020
+
+	#	Translated to Julia By Cyprien Bosserelle and Takuya Miyashita 2020
 	#	References:
 	#	   Aki K., and P. G. Richards, Quantitative seismology, Freemann & Co,
 	#	      New York, 1980.
@@ -224,7 +224,7 @@ module Okada
 
 		uyy = (-U1/(2*pi) * chinnery(uyy_ss,x,p,L,W,q,dip,nu) # strike-slip
 		       -U2/(2*pi) * chinnery(uyy_ds,x,p,L,W,q,dip,nu) # dip-slip
-			   +U3/(2*pi) * chinnery(uyy_tf,x,p,L,W,q,dip,nu)) # tensile fault			   
+			   +U3/(2*pi) * chinnery(uyy_tf,x,p,L,W,q,dip,nu)) # tensile fault
 		## TM thinks these signs are opposite
 		uxx = -uxx
 		uxy = -uxy
@@ -443,7 +443,7 @@ module Okada
 		return I
 	end
 
-	function I2(eta,q,dip,nu,R) 
+	function I2(eta,q,dip,nu,R)
 		return (1 - 2*nu) * (-log(R + eta)) - I3(eta,q,dip,nu,R)
 	end
 
@@ -547,7 +547,7 @@ module Okada
 		return K
 	end
 
-	function K2(xi,eta,q,dip,nu,R) 
+	function K2(xi,eta,q,dip,nu,R)
 		return (1 - 2*nu) * (-sin(dip)/R + q*cos(dip)/(R*(R + eta))) - K3(xi,eta,q,dip,nu,R)
 	end
 
@@ -677,11 +677,11 @@ module Okada
 		return J
 	end
 
-	function J3(xi,eta,q,dip,nu,R) 
+	function J3(xi,eta,q,dip,nu,R)
 		return (1 - 2*nu) * -xi/(R*(R + eta)) - J2(xi,eta,q,dip,nu,R)
 	end
 
-	function J4(xi,eta,q,dip,nu,R) 
+	function J4(xi,eta,q,dip,nu,R)
 		return (1 - 2*nu) * (-cos(dip)/R - q*sin(dip)/(R*(R + eta))) - J1(xi,eta,q,dip,nu,R)
 	end
 end
