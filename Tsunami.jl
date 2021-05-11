@@ -10,7 +10,7 @@
 module Tsunami
 
     import Okada,NetCDF
-    export InitTsunamiGeo,InitTsunami,faultparam,faultkm2m!,rotatexy,unrotatexy,unrotatexyCompass,rotatexyCompass,sphericDist,sphericOffset,mvBLref2centroid!,emptygrid,cartsphdist2eq,cartdistance2eq,CalcMw,Mw2slip,Calcslip!
+    export InitTsunamiGeo,InitTsunami,faultparam,tsunamidemo,faultkm2m!,rotatexy,unrotatexy,unrotatexyCompass,rotatexyCompass,sphericDist,sphericOffset,mvBLref2centroid!,emptygrid,cartsphdist2eq,cartdistance2eq,CalcMw,Mw2slip,Calcslip!
 
 """
 Fault parameter structure to simplify tsunami generation from earthquake
@@ -287,7 +287,7 @@ Fault parameter structure to simplify tsunami generation from earthquake
         dHdy[:,2:end]=diff(H,dims=2)./diff(nf,dims=2);
 
         # Calculate horizontal and vertical deformation
-        uX,uY,uZ = Okada.okada85(ef,nf,fault.depth,fault.strike,fault.dip,fault.length,fault.width,fault.rake,fault.slip,0; nargout=3)
+        uX,uY,uZ = Okada.okada85(ef,nf,fault.depth,fault.strike,fault.dip,fault.length,fault.width,fault.rake,fault.slip,0.0; nargout=3)
 
         dz = uZ .+ uX .* dHdx .+ uY .* dHdy
 
@@ -326,13 +326,15 @@ Fault parameter structure to simplify tsunami generation from earthquake
 
             return dz
         end
-    function tsunamidemo(ncfile)
-
-        #Read bathy grid for nearfield simulations
-        x=NetCDF.ncread(ncfile,"lon")
-        y=NetCDF.ncread(ncfile,"lat")
-        zb=NetCDF.ncread(ncfile,"z")
-
+    function tsunamidemo()
+        # First read a bathymetry
+        # Read bathy grid from netcdf
+        x=collect(135.0:0.1:150.0)
+        y=collect(30.0:0.1:40.0)
+        # create a dummy bathymetry
+        zb=fill(-4000.0,(length(x),length(y)))
+        # Put an island just off the center
+        zb[Int(ceil(length(x)/3)):Int(ceil(length(x)/2)),Int(ceil(length(y)/3)):Int(ceil(length(y)/2))].=10.0
 
         # Convert topography to actual water dpth assuming 0.0 mean sea level
         zs=0.0;
@@ -346,11 +348,11 @@ Fault parameter structure to simplify tsunami generation from earthquake
         # Note: bottom left corner of fault with a strike of 192 means north east corner
         fault=faultparam(flt_lon,flt_lat,300.0,150.0,0.0,192.0,12.0,90.0,0.0,0.0,0.0);
 
-        #convert km width lengtn and depth to m
+        # Convert km width length and depth to m
         # (It is easier to think in km but safer to keep all in a standard unit [m])
         faultkm2m!(fault)
 
-        #convert from bottom left reference point to centroid
+        # Convert from bottom left reference point to centroid
         mvBLref2centroid!(fault)
 
         # Calculate the slip for a given earthquake magnitude
@@ -361,6 +363,9 @@ Fault parameter structure to simplify tsunami generation from earthquake
 
         write2nc(x,y,dz,"Vertical_displacement.nc")
 
+        # For comparison Let's redo the analysis but ignoring the
+        # contribution the effect of coseismic horizontal displacements of
+        # ocean bottom on the sea surface
         uz=InitTsunamiGeo(x,y,zeros(size(H)),fault)
         write2nc(x,y,uz,"Vertical_displacement_Flat_Bathymetry.nc")
     end

@@ -153,7 +153,7 @@ module Okada
         any(nargout .== [1,3,9,12]) || error("kwarg 'nargout' must be either 1, 3, 9, or 12.")
 
 		if(depth<W*0.5*sind(dip))
-			warn("Depth too shallow! ")
+			@warn("Depth too shallow! ")
 		end
 
 		strike = strike*pi/180  # converting STRIKE in radian
@@ -247,9 +247,80 @@ module Okada
 		end
 	end
 
-	function okada85(e::AbstractArray,n::AbstractArray,depth,strike,dip,L,W,rake,slip,U3; kwargs...)
+	# function okada85(e::AbstractArray,n::AbstractArray,depth,strike,dip,L,W,rake,slip,U3; kwargs...)
+	# 	size(e) != size(n) && error("The sizes of E and N must be the same. \n size(E) = $(size(e)) \n size(N) = $(size(n))")
+	# 	return map(x->reshape(x,size(e)), collect.(zip(okada85.(e,n,depth,strike,dip,L,W,rake,slip,U3; kwargs...)...)))
+	# end
+	function okada85(e::AbstractArray,n::AbstractArray,depth,strike,dip,L,W,rake,slip,U3; nu=0.25, nargout::Integer=3)
 		size(e) != size(n) && error("The sizes of E and N must be the same. \n size(E) = $(size(e)) \n size(N) = $(size(n))")
-		return map(x->reshape(x,size(e)), collect.(zip(okada85.(e,n,depth,strike,dip,L,W,rake,slip,U3; kwargs...)...)))
+
+		# we assume zize is 2d
+
+		nx,ny=size(e);
+
+		if nargout>=1
+			uz=zeros(nx,ny);
+		end
+		if nargout>=3
+			ue=zeros(nx,ny);
+			un=zeros(nx,ny);
+		end
+		if nargout>=9
+			uze=zeros(nx,ny);
+			uzn=zeros(nx,ny);
+			unn=zeros(nx,ny);
+			une=zeros(nx,ny);
+			uen=zeros(nx,ny);
+			uee=zeros(nx,ny);
+		end
+		if nargout>=12
+			uez=zeros(nx,ny);
+			unz=zeros(nx,ny);
+			uzz=zeros(nx,ny);
+		end
+
+
+
+
+		# ue=zeros(nx,ny);
+		# un=zeros(nx,ny);
+		# uz=zeros(nx,ny);
+		#
+
+		if nargout==1
+			for i=1:nx
+			 	for j=1:ny
+		 			uz[i,j]=okada85(e[i,j],n[i,j],depth,strike,dip,L,W,rake,slip,U3;nu=nu,nargout=nargout);
+				end
+			end
+			return uz;
+		elseif nargout==3
+			for i=1:nx
+			 	for j=1:ny
+		 			ue[i,j],un[i,j],uz[i,j]=okada85(e[i,j],n[i,j],depth,strike,dip,L,W,rake,slip,U3;nu=nu,nargout=nargout);
+				end
+			end
+			return ue,un,uz;
+		elseif nargout==9
+			for i=1:nx
+			 	for j=1:ny
+		 			ue[i,j],un[i,j],uz[i,j],uze[i,j],uzn[i,j],unn[i,j],une[i,j],uen[i,j],uee[i,j]=okada85(e[i,j],n[i,j],depth,strike,dip,L,W,rake,slip,U3;nu=nu,nargout=nargout);
+				end
+			end
+			return ue,un,uz,uze,uzn,unn,une,uen,uee
+		elseif nargout==12
+			for i=1:nx
+			 	for j=1:ny
+		 			ue[i,j],un[i,j],uz[i,j],uee[i,j],une[i,j],uze[i,j],uen[i,j],unn[i,j],uzn[i,j],uez[i,j],unz[i,j],uzz[i,j]=okada85(e[i,j],n[i,j],depth,strike,dip,L,W,rake,slip,U3;nu=nu,nargout=nargout);
+				end
+			end
+			return ue,un,uz,uee,une,uze,uen,unn,uzn,uez,unz,uzz
+		end
+
+		#return map(x->reshape(x,size(e)), collect.(okada85.(e,n,depth,strike,dip,L,W,rake,slip,U3; nu=nu, nargout=nargout)))
+
+
+		# return map(x->reshape(x,size(e)), collect.(zip(okada85.(e,n,depth,strike,dip,L,W,rake,slip,U3; kwargs...)...)))
 	end
 
 	import Test
