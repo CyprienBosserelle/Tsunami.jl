@@ -369,4 +369,19 @@ Fault parameter structure to simplify tsunami generation from earthquake
         uz=InitTsunamiGeo(x,y,zeros(size(H)),fault)
         write2nc(x,y,uz,"Vertical_displacement_Flat_Bathymetry.nc")
     end
+
+    function gaussian2dv(x,y,a,xo,yo,c)
+    	return a * exp(-1.0 * ((x - xo) * (x - xo) + (y - yo) * (y - yo)) / (2.0 * c * c));
+    end
+
+
+
+    function gaussian2d(x,y,a,xo,yo,c)
+    	zs=zeros(length(x),length(y))
+    	for (i, v) in enumerate(x)
+    		zs[i,:]=gaussian2dv.(v,y,a,xo,yo,c)
+    	end
+    	return zs
+    end
+
 end
