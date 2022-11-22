@@ -1,5 +1,6 @@
 # Tsunami.jl
-Julia module with tools useful tsunami science.
+Julia module with tools useful for tsunami science. At this stage the module is only good for generating initial deformation from earthquake tsunami but recent work will be integrated for eruption tsunami and reusing online database.
+
 
 ## Demo for generating a tsunami initial wave
  ```julia      
