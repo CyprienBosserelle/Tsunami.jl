@@ -1,0 +1,6 @@
+name = "Tsunami"
+uuid = ""
+version = "0.1.0"
+authors = ["Cyprien Bosserelle <cyprien.bosserelle@gmail.com>", "Takuya Miyashita <miyashita@hydrocoast.jp>"]
+
+[deps]
