@@ -9,7 +9,8 @@
 """
 module Tsunami
 
-    import Okada,NetCDF
+    include("./Okada.jl")
+    import .Okada,NetCDF
     export InitTsunamiGeo,InitTsunami,faultparam,tsunamidemo,faultkm2m!,rotatexy,unrotatexy,unrotatexyCompass,rotatexyCompass,sphericDist,sphericOffset,mvBLref2centroid!,emptygrid,cartsphdist2eq,cartdistance2eq,CalcMw,Mw2slip,Calcslip!
 
 """

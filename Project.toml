@@ -3,6 +3,10 @@ uuid = "3acf1de0-e60a-4e93-9870-109d990ff46a"
 authors = ["Cyprien Bosserelle <cyprien.bosserelle@gmail.com>", "Takuya Miyashita <miyashita@hydrocoast.jp>"]
 version = "0.1.0"
 
+[deps]
+NetCDF = "30363a11-5582-574a-97bb-aa9a979735b9"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
 [compat]
 julia = "1"
 
