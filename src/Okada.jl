@@ -17,9 +17,9 @@
 	Translated from Matlab to Julia By Cyprien Bosserelle and Takuya Miyashita 2020
 
 """
-module Okada
+#module Okada
 
-	export okada85, testokada
+	#export okada85, testokada
 
 	#	Translated to Julia By Cyprien Bosserelle and Takuya Miyashita 2020
 	#	References:
@@ -755,4 +755,4 @@ module Okada
 	function J4(xi,eta,q,dip,nu,R)
 		return (1 - 2*nu) * (-cos(dip)/R - q*sin(dip)/(R*(R + eta))) - J1(xi,eta,q,dip,nu,R)
 	end
-end
+#end
