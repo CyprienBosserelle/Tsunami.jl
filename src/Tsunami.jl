@@ -32,30 +32,48 @@ Fault parameter structure to simplify tsunami generation from earthquake
     end
 
 
+    """
+        CalcMw(fault::faultparam;rigidity=4.0e11)
 
-    function CalcMw(fault::faultparam)
+    Calculate earthquake moment magnitude based on fault dimension and slip amount.
+
+    """
+    function CalcMw(fault::faultparam;rigidity=4.0e11)
         # Calculate Mw based on fault dimention and slip
-        Mo=4.0e11*fault.slip*100*fault.length*100*fault.width*100;
+        Mo=rigidity*fault.slip*100*fault.length*100*fault.width*100;
         Mw=2/3*log10(Mo)-10.7;
         return Mw
     end
 
-    function Mw2slip(Mw,length,width)
+    """
+        Mw2slip(Mw,length,width;rigidity=4.0e11)
+
+    Calculate earthquake slip amount on a fault based on fault dimension and moment magnitude
+    """
+    function Mw2slip(Mw,length,width;rigidity=4.0e11)
         #Calculate slip based on Mw and fault dimension in m
         Mo=10^((Mw+10.7).*(3.0/2.0))
-        slip=Mo/(4.0e11*100*length*100*width*100);
+        slip=Mo/(rigidity*100*length*100*width*100);
 
 
         return slip
     end
 
+    """
+        Calcslip!(fault::faultparam,Mw)
+
+    Inplace calculation of fault slip amount given a fault and earthquake magnitude
+    """
     function Calcslip!(fault::faultparam,Mw)
         slip=Mw2slip(Mw,fault.length,fault.width)
         fault.slip=slip;
         return fault
     end
 
-
+    """
+        faultkm2m!(fault::faultparam)
+    Inplace conversion of fault dimension from kilometers to meters. Only applies to fault length, width and depth (does not applies to slip) 
+    """
     function faultkm2m!(fault::faultparam)
         #modify fault length and width from km to m
         fault.length*=1000.0;
@@ -64,6 +82,10 @@ Fault parameter structure to simplify tsunami generation from earthquake
         return fault
     end
 
+    """
+        rotatexy(x,y,xo,yo,theta)
+    coordinate rotation function used to change between fault origin to centroid 
+    """
     function rotatexy(x,y,xo,yo,theta)
         # Rotate x y coordinate by theta.
         # theta is in radian following the maths convention
@@ -73,6 +95,10 @@ Fault parameter structure to simplify tsunami generation from earthquake
         return newx,newy
     end
 
+    """
+        unrotatexy(x,y,xo,yo,theta)
+    coordinate unrotation function used to change between fault origin to centroid 
+    """
     function unrotatexy(x,y,xo,yo,theta)
         ## unRotate x y coordinate by theta.
         # theta is in radian following the maths convention
@@ -100,8 +126,10 @@ Fault parameter structure to simplify tsunami generation from earthquake
 
 
 
-
-
+    """
+        sphericDist(lon1,lat1,lon2,lat2)
+    Harversine equation to calculate sperical distances
+    """
     function sphericDist(lon1,lat1,lon2,lat2)
         # Calculate spherical distance between 2 pts
         # distance is in m
@@ -121,13 +149,13 @@ Fault parameter structure to simplify tsunami generation from earthquake
         return asin(st)*earthradius
     end
 
-    function sphericOffset(lon,lat,de,dn)
+    function sphericOffset(lon,lat,de,dn;earthradius=6356750.52)
         # Offset lat and lon by given eats and north offsets meters
         # de: delta east;  dn: delta north  offsets are in meters
 
 
 
-        earthradius=6356750.52;
+        
 
         bearing=atan(de,dn);
 
