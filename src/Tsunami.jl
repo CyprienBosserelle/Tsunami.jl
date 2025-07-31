@@ -316,7 +316,7 @@ Fault parameter structure to simplify tsunami generation from earthquake
         dHdy[:,2:end]=diff(H,dims=2)./diff(nf,dims=2);
 
         # Calculate horizontal and vertical deformation
-        uX,uY,uZ = Okada.okada85(ef,nf,fault.depth,fault.strike,fault.dip,fault.length,fault.width,fault.rake,fault.slip,0.0; nargout=3)
+        uX,uY,uZ = okada85(ef,nf,fault.depth,fault.strike,fault.dip,fault.length,fault.width,fault.rake,fault.slip,0.0; nargout=3)
 
         dz = uZ .+ uX .* dHdx .+ uY .* dHdy
 
@@ -349,7 +349,7 @@ Fault parameter structure to simplify tsunami generation from earthquake
             dHdy[:,2:end]=diff(H,dims=2)./diff(nf,dims=2);
 
             # Calculate horizontal and vertical deformation
-            uX,uY,uZ = Okada.okada85(ef,nf,fault.depth,fault.strike,fault.dip,fault.length,fault.width,fault.rake,fault.slip,0; nargout=3)
+            uX,uY,uZ = okada85(ef,nf,fault.depth,fault.strike,fault.dip,fault.length,fault.width,fault.rake,fault.slip,0; nargout=3)
 
             dz = uZ .+ uX .* dHdx .+ uY .* dHdy
 
