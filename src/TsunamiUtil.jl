@@ -338,8 +338,15 @@ Fault parameter structure to simplify tsunami generation from earthquake
         return dz
     end
 
+    function zerobnd(dz;bndval=0.0)
+        dz[1,:] .= bndval;
+        dz[end,:] .= bndval;
+        dz[:,1] .= bndval;
+        dz[:,end] .= bndval;
 
-
+        return dz
+    end
+ 
     """
     Generate tsunami initial wave for a projected domain (i.e. Easting and Northing coordinates)
         usage: dz=InitTsunami(xx,yy,H,fault)
@@ -405,6 +412,9 @@ Fault parameter structure to simplify tsunami generation from earthquake
         # Calculate the initial tsunami wave
         dz=InitTsunamiGeo(x,y,H,fault)
 
+        # Make sure we have zeros on the boundary (our model will extrapolate the bnd values to the rest of the grid)
+        dz=zerobnd(dz);
+
         write2nc(x,y,dz,"Vertical_displacement.nc")
 
         # For comparison Let's redo the analysis but ignoring the
@@ -431,7 +441,7 @@ Fault parameter structure to simplify tsunami generation from earthquake
     """
     sftstr="3.904*ki5a+8.345*ki6z+1.1*ki7b+11.433*ki7a+4.184*ki7z+1.847*ki8b+6.248*ki8a+5.957*ki8z+5.709*ki9z"
     """
-    function SIFTTsunami(siftstring::String;dx=0.01)
+    function SIFTTsunami(siftstring::String;dx=0.1)
         ################
         Fltseg,bbox=readSIFTstring(siftstring);
 
@@ -450,6 +460,8 @@ Fault parameter structure to simplify tsunami generation from earthquake
 
             dz=dz.+dzthisflt;
         end
+
+        dz=zerobnd(dz);
 
         write2nc(x,y,dz,"Vertical_displacement.nc")
 
