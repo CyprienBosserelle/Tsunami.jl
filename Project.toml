@@ -4,8 +4,10 @@ authors = ["Cyprien Bosserelle <cyprien.bosserelle@gmail.com>", "Takuya Miyashit
 version = "0.1.0"
 
 [deps]
+DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 NetCDF = "30363a11-5582-574a-97bb-aa9a979735b9"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+Wavelets = "29a6e085-ba6d-5f35-a997-948ac2efa89a"
 
 [compat]
 julia = "1"
