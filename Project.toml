@@ -1,0 +1,17 @@
+name = "TsunamiTools"
+uuid = "f7783e52-1dab-4a1d-b7ad-17b8ab7f50f5"
+authors = ["Cyprien Bosserelle <cyprien.bosserelle@gmail.com>", "Takuya Miyashita <miyashita@hydrocoast.jp>"]
+version = "0.1.0"
+
+[deps]
+NetCDF = "30363a11-5582-574a-97bb-aa9a979735b9"
+
+[compat]
+NetCDF = "0.11, 0.12"
+julia = "1.6"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]

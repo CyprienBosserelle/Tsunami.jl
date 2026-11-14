@@ -19,7 +19,7 @@
 """
 module Okada
 
-	export okada85, testokada
+	export okada85
 
 	#	Translated to Julia By Cyprien Bosserelle and Takuya Miyashita 2020
 	#	References:
@@ -247,161 +247,26 @@ module Okada
 		end
 	end
 
-	# function okada85(e::AbstractArray,n::AbstractArray,depth,strike,dip,L,W,rake,slip,U3; kwargs...)
-	# 	size(e) != size(n) && error("The sizes of E and N must be the same. \n size(E) = $(size(e)) \n size(N) = $(size(n))")
-	# 	return map(x->reshape(x,size(e)), collect.(zip(okada85.(e,n,depth,strike,dip,L,W,rake,slip,U3; kwargs...)...)))
-	# end
 	function okada85(e::AbstractArray,n::AbstractArray,depth,strike,dip,L,W,rake,slip,U3; nu=0.25, nargout::Integer=3)
 		size(e) != size(n) && error("The sizes of E and N must be the same. \n size(E) = $(size(e)) \n size(N) = $(size(n))")
+		any(nargout .== [1,3,9,12]) || error("kwarg 'nargout' must be either 1, 3, 9, or 12.")
 
-		# we assume zize is 2d
-
-		nx,ny=size(e);
-
-		if nargout>=1
-			uz=zeros(nx,ny);
-		end
-		if nargout>=3
-			ue=zeros(nx,ny);
-			un=zeros(nx,ny);
-		end
-		if nargout>=9
-			uze=zeros(nx,ny);
-			uzn=zeros(nx,ny);
-			unn=zeros(nx,ny);
-			une=zeros(nx,ny);
-			uen=zeros(nx,ny);
-			uee=zeros(nx,ny);
-		end
-		if nargout>=12
-			uez=zeros(nx,ny);
-			unz=zeros(nx,ny);
-			uzz=zeros(nx,ny);
+		if nargout == 1
+			return map((ei,ni)->okada85(ei,ni,depth,strike,dip,L,W,rake,slip,U3; nu=nu, nargout=1), e, n)
 		end
 
-
-
-
-		# ue=zeros(nx,ny);
-		# un=zeros(nx,ny);
-		# uz=zeros(nx,ny);
-		#
-
-		if nargout==1
-			for i=1:nx
-			 	for j=1:ny
-		 			uz[i,j]=okada85(e[i,j],n[i,j],depth,strike,dip,L,W,rake,slip,U3;nu=nu,nargout=nargout);
-				end
+		# One output array per returned component, same shape as e
+		out = ntuple(_->zeros(size(e)), nargout)
+		for I in eachindex(e, n)
+			r = okada85(e[I],n[I],depth,strike,dip,L,W,rake,slip,U3; nu=nu, nargout=nargout)
+			for k in 1:nargout
+				out[k][I] = r[k]
 			end
-			return uz;
-		elseif nargout==3
-			for i=1:nx
-			 	for j=1:ny
-		 			ue[i,j],un[i,j],uz[i,j]=okada85(e[i,j],n[i,j],depth,strike,dip,L,W,rake,slip,U3;nu=nu,nargout=nargout);
-				end
-			end
-			return ue,un,uz;
-		elseif nargout==9
-			for i=1:nx
-			 	for j=1:ny
-		 			ue[i,j],un[i,j],uz[i,j],uze[i,j],uzn[i,j],unn[i,j],une[i,j],uen[i,j],uee[i,j]=okada85(e[i,j],n[i,j],depth,strike,dip,L,W,rake,slip,U3;nu=nu,nargout=nargout);
-				end
-			end
-			return ue,un,uz,uze,uzn,unn,une,uen,uee
-		elseif nargout==12
-			for i=1:nx
-			 	for j=1:ny
-		 			ue[i,j],un[i,j],uz[i,j],uee[i,j],une[i,j],uze[i,j],uen[i,j],unn[i,j],uzn[i,j],uez[i,j],unz[i,j],uzz[i,j]=okada85(e[i,j],n[i,j],depth,strike,dip,L,W,rake,slip,U3;nu=nu,nargout=nargout);
-				end
-			end
-			return ue,un,uz,uee,une,uze,uen,unn,uzn,uez,unz,uzz
 		end
-
-		#return map(x->reshape(x,size(e)), collect.(okada85.(e,n,depth,strike,dip,L,W,rake,slip,U3; nu=nu, nargout=nargout)))
-
-
-		# return map(x->reshape(x,size(e)), collect.(zip(okada85.(e,n,depth,strike,dip,L,W,rake,slip,U3; kwargs...)...)))
-	end
-
-	import Test
-	function runtest(x,y,d,dip,L,W,rake,slip,u3,ref, precision)
-
-	    ue,un,uz,uze,uzn,unn,une,uen,uee=okada85(x-L/2,y-cosd(dip)*W/2,d-sind(dip)*W/2,90,dip,L,W,rake,slip,u3; nargout=9)
-	    return Test.@test [ue,un,uz,uee,uen,une,unn,uze,uzn] ≈ ref atol=precision
-	end
-
-	"""
-	Test function for Okada
-	"""
-	function testokada()
-		# ###################
-		# ##### TEST
-		# ####################
-
-		Test.@testset "Okada Test" begin
-
-		    Test.@testset "Case 2" begin
-		        x=2; y=3; d=4;dip=70;L=3;W=2;
-		        #Strike
-		        rake=0;slip=1;u3=0;
-		        ref = [-8.689E-3,-4.298E-3,-2.747E-3,-1.220E-3,+2.470E-4,-8.191E-3,-5.814E-4,-5.175E-3,+2.945E-4]	# case 2 - strike
-
-		        runtest(x,y,d,dip,L,W,rake,slip,u3,ref,1.0e-6)
-
-		        # Dip
-		        ref = [-4.682E-3,-3.527E-2,-3.564E-2,-8.867E-3,-1.519E-4,+4.057E-3,-1.035E-2,+4.088E-3,+2.626E-3];	# case 2 - dip
-		        rake=90;slip=1;
-
-		        runtest(x,y,d,dip,L,W,rake,slip,u3,ref,1.0e-5)
-
-		        # tensile
-		        slip = 0; u3=1; rake=0;
-		        ref = [-2.660E-4,+1.056E-2,+3.214E-3,-5.655E-4,+1.993E-3,-1.066E-3,+1.230E-2,-3.730E-4,+1.040E-2];	# case 2 - tensile
-
-		        runtest(x,y,d,dip,L,W,rake,slip,u3,ref,1.0e-5)
-
-		    end
-		    Test.@testset "Case 3" begin
-		        x = 0; y = 0; d = 4; dip = 90; L = 3; W = 2;
-		        # Strike
-		        rake=0;slip=1;u3=0;
-		        ref = [0,+5.253E-3,        0,        0,-1.864E-2,-2.325E-3,        0,        0,+2.289E-2];	# case 3 - strike
-		        runtest(x,y,d,dip,L,W,rake,slip,u3,ref,1.0e-5)
-
-		        # Dip
-		        rake=90;slip=1;
-		        ref = [0,        0,        0,        0,+2.748E-2,        0,        0,        0,-7.166E-2];	# case 3 - dip
-		        runtest(x,y,d,dip,L,W,rake,slip,u3,ref,1.0e-5)
-
-		        # tensile
-		        slip = 0; u3=1; rake=0;
-		        ref = [+1.223E-2,        0,-1.606E-2,-4.182E-3,        0,        0,-2.325E-3,-9.146E-3, 0];	# case 3 - tensile
-		        runtest(x,y,d,dip,L,W,rake,slip,u3,ref,1.0e-5)
-		    end
-
-		    Test.@testset "Case 4" begin
-		        x = 0; y = 0; d = 6; dip = 90; L = 3; W = 2;
-		        # Strike
-		        rake=180;slip=1;u3=0;
-		        ref = [0,-1.303E-3,        0,        0,+2.726E-3,+7.345E-4,        0,        0,-4.422E-3];	# case 4 - strike
-		        runtest(x,y,d,dip,L,W,rake,slip,u3,ref,1.0e-5)
-
-		        # Dip
-		        rake=90;slip=1;
-		        ref = [0,        0,        0,        0,+5.157E-3,        0,        0,        0,-1.901E-2];	# case 4 - dip
-		        runtest(x,y,d,dip,L,W,rake,slip,u3,ref,1.0e-5)
-
-		        # tensile
-		        slip = 0; u3=1; rake=0;
-		        ref = [+3.507E-3,        0,-7.740E-3,-1.770E-3,        0,        0,-7.345E-4,-1.843E-3,0];
-		        runtest(x,y,d,dip,L,W,rake,slip,u3,ref,1.0e-5)
-
-		    end
-		end
+		return out
 	end
 
 
-		"""
 		# Notes for I... and K... subfunctions:
 		#
 		#	1. original formulas use Lame's parameters as mu/(mu+lambda) which
@@ -410,7 +275,6 @@ module Okada
 		#	   because cos(90*pi/180) is not zero but = 6.1232e-17 (!)
 		#	   NOTE: don't use cosd and sind because of incompatibility
 		#	   with Matlab v6 and earlier...
-		"""
 
 
 	"""

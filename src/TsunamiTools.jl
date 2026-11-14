@@ -1,16 +1,19 @@
-
 """
- Tsunami module
- Collection of function useful for tsunami simulations.
+    TsunamiTools
 
-     Cyprien Bosserelle and Takuya Miyashita 2020
+Collection of functions useful for tsunami science, e.g. generating the initial
+tsunami wave from an earthquake fault using the Okada (1985) solution.
 
-
+Cyprien Bosserelle and Takuya Miyashita 2020
 """
-module Tsunami
+module TsunamiTools
 
-    import Okada,NetCDF
-    export InitTsunamiGeo,InitTsunami,faultparam,tsunamidemo,faultkm2m!,rotatexy,unrotatexy,unrotatexyCompass,rotatexyCompass,sphericDist,sphericOffset,mvBLref2centroid!,emptygrid,cartsphdist2eq,cartdistance2eq,CalcMw,Mw2slip,Calcslip!
+    import NetCDF
+
+    include("Okada.jl")
+    using .Okada: okada85
+
+    export InitTsunamiGeo,InitTsunami,faultparam,tsunamidemo,faultkm2m!,rotatexy,unrotatexy,unrotatexyCompass,rotatexyCompass,sphericDist,sphericOffset,mvBLref2centroid!,emptygrid,cartsphdist2eq,cartdistance2eq,CalcMw,Mw2slip,Calcslip!,write2nc,okada85
 
 """
 Fault parameter structure to simplify tsunami generation from earthquake
@@ -188,7 +191,7 @@ Fault parameter structure to simplify tsunami generation from earthquake
 
     end
 
-    function emptygrid(xx::Vector{Float64},yy::Vector{Float64})
+    function emptygrid(xx::AbstractVector{<:Real},yy::AbstractVector{<:Real})
         # porduce arrays of lat,lon/easting,northing representing an empty grid
 
 
@@ -287,7 +290,7 @@ Fault parameter structure to simplify tsunami generation from earthquake
         dHdy[:,2:end]=diff(H,dims=2)./diff(nf,dims=2);
 
         # Calculate horizontal and vertical deformation
-        uX,uY,uZ = Okada.okada85(ef,nf,fault.depth,fault.strike,fault.dip,fault.length,fault.width,fault.rake,fault.slip,0.0; nargout=3)
+        uX,uY,uZ = okada85(ef,nf,fault.depth,fault.strike,fault.dip,fault.length,fault.width,fault.rake,fault.slip,0.0; nargout=3)
 
         dz = uZ .+ uX .* dHdx .+ uY .* dHdy
 
@@ -320,13 +323,20 @@ Fault parameter structure to simplify tsunami generation from earthquake
             dHdy[:,2:end]=diff(H,dims=2)./diff(nf,dims=2);
 
             # Calculate horizontal and vertical deformation
-            uX,uY,uZ = Okada.okada85(ef,nf,fault.depth,fault.strike,fault.dip,fault.length,fault.width,fault.rake,fault.slip,0; nargout=3)
+            uX,uY,uZ = okada85(ef,nf,fault.depth,fault.strike,fault.dip,fault.length,fault.width,fault.rake,fault.slip,0; nargout=3)
 
             dz = uZ .+ uX .* dHdx .+ uY .* dHdy
 
             return dz
         end
-    function tsunamidemo()
+    """
+    Run a demo on a synthetic bathymetry and write the results to NetCDF files.
+
+        tsunamidemo(outdir=pwd())
+
+    Writes `Vertical_displacement.nc` and `Vertical_displacement_Flat_Bathymetry.nc` in `outdir`.
+    """
+    function tsunamidemo(outdir::AbstractString=pwd())
         # First read a bathymetry
         # Read bathy grid from netcdf
         x=collect(135.0:0.1:150.0)
@@ -361,12 +371,13 @@ Fault parameter structure to simplify tsunami generation from earthquake
         # Calculate the initial tsunami wave
         dz=InitTsunamiGeo(x,y,H,fault)
 
-        write2nc(x,y,dz,"Vertical_displacement.nc")
+        write2nc(x,y,dz,joinpath(outdir,"Vertical_displacement.nc"))
 
         # For comparison Let's redo the analysis but ignoring the
         # contribution the effect of coseismic horizontal displacements of
         # ocean bottom on the sea surface
         uz=InitTsunamiGeo(x,y,zeros(size(H)),fault)
-        write2nc(x,y,uz,"Vertical_displacement_Flat_Bathymetry.nc")
+        write2nc(x,y,uz,joinpath(outdir,"Vertical_displacement_Flat_Bathymetry.nc"))
+        return dz,uz
     end
 end
