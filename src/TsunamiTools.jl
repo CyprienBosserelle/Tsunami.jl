@@ -12,8 +12,9 @@ module TsunamiTools
 
     include("Okada.jl")
     using .Okada: okada85
+    include("Kajiura.jl")
 
-    export InitTsunamiGeo,InitTsunami,faultparam,tsunamidemo,faultkm2m!,rotatexy,unrotatexy,unrotatexyCompass,rotatexyCompass,sphericDist,sphericOffset,mvBLref2centroid!,emptygrid,cartsphdist2eq,cartdistance2eq,CalcMw,Mw2slip,Calcslip!,write2nc,okada85
+    export InitTsunamiGeo,InitTsunami,faultparam,tsunamidemo,faultkm2m!,rotatexy,unrotatexy,unrotatexyCompass,rotatexyCompass,sphericDist,sphericOffset,mvBLref2centroid!,emptygrid,cartsphdist2eq,cartdistance2eq,CalcMw,Mw2slip,Calcslip!,write2nc,okada85,kajiuraG,kajiurafilter,kajiurafilterGeo
 
 """
 Fault parameter structure to simplify tsunami generation from earthquake
@@ -269,13 +270,14 @@ Fault parameter structure to simplify tsunami generation from earthquake
 
     """
     Generate tsunami initial wave for a Geographical domain (i.e. lat and lon coordinates)
-        usage: dz=InitTsunamiGeo(xx,yy,H,fault)
+        usage: dz=InitTsunamiGeo(xx,yy,H,fault; kajiura=false, rmax=6.0)
         where xx and yy can be vector or a range
         H is an array of water depth [m]
+        kajiura=true smooths the result with the Kajiura (1963) filter (see `kajiurafilterGeo`)
         see tsunamidemo()
 
     """
-    function InitTsunamiGeo(xx,yy,H,fault::faultparam)
+    function InitTsunamiGeo(xx,yy,H,fault::faultparam; kajiura::Bool=false, rmax::Real=6.0)
 
         # Create the array of easting and northing where deformation will be calculated
         E,N=emptygrid(xx,yy)
@@ -294,6 +296,10 @@ Fault parameter structure to simplify tsunami generation from earthquake
 
         dz = uZ .+ uX .* dHdx .+ uY .* dHdy
 
+        if kajiura
+            dz = kajiurafilterGeo(xx,yy,dz,H; rmax=rmax)
+        end
+
         return dz
     end
 
@@ -301,13 +307,14 @@ Fault parameter structure to simplify tsunami generation from earthquake
 
     """
     Generate tsunami initial wave for a projected domain (i.e. Easting and Northing coordinates)
-        usage: dz=InitTsunami(xx,yy,H,fault)
+        usage: dz=InitTsunami(xx,yy,H,fault; kajiura=false, rmax=6.0)
         where xx and yy can be vector or a range
         H is an array of water depth [m]
+        kajiura=true smooths the result with the Kajiura (1963) filter (see `kajiurafilter`)
         see tsunamidemo()
 
     """
-        function InitTsunami(xx,yy,H,fault::faultparam)
+        function InitTsunami(xx,yy,H,fault::faultparam; kajiura::Bool=false, rmax::Real=6.0)
 
             # Create the array of easting and northing where deformation will be calculated
             E,N=emptygrid(xx,yy)
@@ -326,6 +333,10 @@ Fault parameter structure to simplify tsunami generation from earthquake
             uX,uY,uZ = okada85(ef,nf,fault.depth,fault.strike,fault.dip,fault.length,fault.width,fault.rake,fault.slip,0; nargout=3)
 
             dz = uZ .+ uX .* dHdx .+ uY .* dHdy
+
+            if kajiura
+                dz = kajiurafilter(xx,yy,dz,H; rmax=rmax)
+            end
 
             return dz
         end

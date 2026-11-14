@@ -57,6 +57,26 @@ write2nc(x, y, dz, "Tohoku_fulldz.nc")
 
 `Tohoku_fulldz.nc` can now be used to initialise a tsunami wave in a hydrodynamic model.
 
+## Smoothing the deformation (Kajiura filter)
+
+The water column filters out the short wavelengths of the seafloor deformation:
+the sea-surface response is the seafloor uplift filtered by `1/cosh(kH)`
+(Kajiura, 1963). TsunamiTools applies this filter as a convolution with
+Kajiura's Green's function, using the local water depth, so it also works with
+variable bathymetry. Land (`H <= 0`) is left unchanged.
+
+```julia
+dz = InitTsunamiGeo(x, y, H, fault; kajiura=true)   # or InitTsunami for projected grids
+
+# or on an existing deformation field
+eta = kajiurafilterGeo(x, y, dz, H)    # lon/lat grid
+eta = kajiurafilter(x, y, dz, H)       # projected grid [m]
+```
+
+The kernel is truncated at `rmax = 6` water depths by default. The cost grows
+with `(rmax*H/dx)^2` per grid node, so run Julia with threads (`julia -t auto`)
+for large, fine grids.
+
 ## Running the tests
 
 ```julia
