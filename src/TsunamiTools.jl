@@ -261,7 +261,6 @@ Fault parameter structure to simplify tsunami generation from earthquake
         NetCDF.ncwrite(x,ncfile,varnames[1]);
         NetCDF.ncwrite(y,ncfile,varnames[2]);
         NetCDF.ncwrite(z,ncfile,varnames[3]);
-        NetCDF.ncclose();
     end
     function write2nc(x,y,z,ncfile)
         varnames=["x","y","z"];
